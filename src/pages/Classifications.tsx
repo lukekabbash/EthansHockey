@@ -18,7 +18,6 @@ import {
   Chip,
   Grid,
   Paper,
-  Divider,
   Collapse
 } from '@mui/material';
 import {
@@ -27,7 +26,6 @@ import {
   Search as SearchIcon,
   ArrowUpward as ArrowUpwardIcon,
   ArrowDownward as ArrowDownwardIcon,
-  FilterList as FilterListIcon,
   Clear as ClearIcon
 } from '@mui/icons-material';
 
@@ -559,8 +557,7 @@ const Classifications: React.FC = () => {
                         {groupedData[threshold.name].map(agent => (
                           <tr key={agent['Agent Name']} style={{ 
                             borderBottom: '1px solid #e5e7eb',
-                            backgroundColor: 'white',
-                            '&:hover': { backgroundColor: '#f9fafb' }
+                            backgroundColor: 'white'
                           }}>
                             <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
                               <Box
