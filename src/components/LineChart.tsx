@@ -34,10 +34,9 @@ interface LineChartProps {
     borderColor: string;
     backgroundColor: string;
   }[];
-  className?: string;
 }
 
-const LineChart: React.FC<LineChartProps> = ({ title, labels, datasets, className = '' }) => {
+const LineChart: React.FC<LineChartProps> = ({ title, labels, datasets }) => {
   // Customize the chart with Predators colors
   const customizedDatasets = datasets.map(dataset => ({
     ...dataset,

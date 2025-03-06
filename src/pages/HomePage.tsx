@@ -11,7 +11,6 @@ import {
   Paper
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
 import BusinessIcon from '@mui/icons-material/Business';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
@@ -33,7 +32,7 @@ const HomePage: React.FC = () => {
     }
   };
   
-  const item = {
+  const itemAnimation = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
@@ -99,7 +98,7 @@ const HomePage: React.FC = () => {
           animate="show"
         >
           {navItems.map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item.path} component={motion.div} variants={item}>
+            <Grid item xs={12} sm={6} md={4} key={item.path} component={motion.div} variants={itemAnimation}>
               <Card 
                 component={motion.div}
                 whileHover={{ 

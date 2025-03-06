@@ -9,15 +9,13 @@ interface PlayerCardProps {
   imageUrl?: string;
   totalCost: number;
   deliveryValue?: number;
-  className?: string;
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({ 
   playerName, 
   imageUrl, 
   totalCost, 
-  deliveryValue,
-  className = '' 
+  deliveryValue
 }) => {
   const placeholderImage = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg";
   const headshotUrl = imageUrl || getPlayerHeadshotUrl(playerName);

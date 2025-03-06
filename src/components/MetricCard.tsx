@@ -6,10 +6,9 @@ interface MetricCardProps {
   title: string;
   value: string | number;
   icon?: React.ReactNode;
-  className?: string;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, icon, className = '' }) => {
+const MetricCard: React.FC<MetricCardProps> = ({ title, value, icon }) => {
   return (
     <Card 
       component={motion.div}

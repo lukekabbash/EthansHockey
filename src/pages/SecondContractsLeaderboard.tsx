@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchData } from '@/api/dataService';
 import { formatCurrency } from '@/utils/formatters';
-import type { RanksData } from '@/api/dataService';
 
 interface SecondContractData {
   'Agent Name': string;
@@ -13,7 +12,6 @@ interface SecondContractData {
 const SecondContractsLeaderboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [ranksData, setRanksData] = useState<RanksData[]>([]);
   const [secondContractsData, setSecondContractsData] = useState<SecondContractData[]>([]);
 
   useEffect(() => {
@@ -21,7 +19,6 @@ const SecondContractsLeaderboard: React.FC = () => {
       try {
         setLoading(true);
         const { ranksData } = await fetchData();
-        setRanksData(ranksData);
         
         // Create a map from agent name -> agency name
         const agencyMap = ranksData.reduce((map, agent) => {

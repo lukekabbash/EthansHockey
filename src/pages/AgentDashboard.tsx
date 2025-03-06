@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchData } from '@/api/dataService';
-import { formatCurrency, formatRank, formatValueCapturePercentage, formatDollarIndex } from '@/utils/formatters';
+import { formatCurrency, formatRank, formatDollarIndex } from '@/utils/formatters';
 import { 
   Box, 
   Typography, 

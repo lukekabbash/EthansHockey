@@ -12,8 +12,6 @@ import {
   ListItemText, 
   Toolbar, 
   Typography, 
-  useMediaQuery, 
-  useTheme 
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -41,9 +39,7 @@ const navItems = [
 ];
 
 const Layout = () => {
-  const theme = useTheme();
   const location = useLocation();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {

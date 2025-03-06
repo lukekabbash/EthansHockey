@@ -1,4 +1,3 @@
-import axios from 'axios';
 import Papa from 'papaparse';
 
 // Local file paths
@@ -144,12 +143,12 @@ const fetchCSV = async (url: string): Promise<any[]> => {
         complete: (results) => {
           // Debug: Log the headers and first row
           if (results.data.length > 0) {
-            console.log('CSV Headers:', Object.keys(results.data[0]));
+            console.log('CSV Headers:', Object.keys(results.data[0] as object));
             console.log('First row sample:', results.data[0]);
           }
           resolve(results.data);
         },
-        error: (error) => {
+        error: (error: Error) => {
           reject(error);
         }
       });
