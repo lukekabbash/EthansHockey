@@ -8,7 +8,8 @@ import {
   CardContent, 
   Button, 
   Container,
-  Paper
+  Paper,
+  IconButton
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import PersonIcon from '@mui/icons-material/Person';
@@ -17,6 +18,7 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import CategoryIcon from '@mui/icons-material/Category';
 import InfoIcon from '@mui/icons-material/Info';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 
 // Predators logo
 const PREDATORS_LOGO = 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Nashville_Predators_Logo_%282011%29.svg/1200px-Nashville_Predators_Logo_%282011%29.svg.png';
@@ -43,7 +45,7 @@ const HomePage: React.FC = () => {
     { path: '/leaderboard', label: 'Leaderboard', icon: <LeaderboardIcon fontSize="large" />, description: 'See rankings of top agents' },
     { path: '/second-contracts-leaderboard', label: 'Second Contracts', icon: <AutoGraphIcon fontSize="large" />, description: 'View second contract performance metrics' },
     { path: '/classifications', label: 'Classifications', icon: <CategoryIcon fontSize="large" />, description: 'Categorize agents based on performance' },
-    { path: '/project-definitions', label: 'Project Definitions', icon: <InfoIcon fontSize="large" />, description: 'Learn about key metrics and data sources' },
+    { path: '/agent-comparison', label: 'Agent Compare', icon: <CompareArrowsIcon fontSize="large" />, description: 'Compare metrics between multiple agents' },
   ];
 
   return (
@@ -171,9 +173,20 @@ const HomePage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
       >
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
-          About This Project
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <IconButton 
+            component={Link} 
+            to="/project-definitions" 
+            color="primary" 
+            sx={{ mr: 1 }}
+            aria-label="Project definitions"
+          >
+            <InfoIcon />
+          </IconButton>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
+            About This Project
+          </Typography>
+        </Box>
         <Typography variant="body1" color="text.secondary">
           This dashboard visualizes data about hockey agents and agencies, providing insights into their performance,
           contract negotiations, and client relationships. The data is sourced from publicly available information
