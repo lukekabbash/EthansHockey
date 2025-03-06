@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAgenciesData, fetchData } from '@/api/dataService';
-import { formatCurrency, formatRank, formatDollarIndex } from '@/utils/formatters';
+import { formatCurrency, formatRank, formatDollarIndex, formatPercentage } from '@/utils/formatters';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -17,7 +18,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  CircularProgress
+  CircularProgress,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import MetricCard from '@/components/MetricCard';
 import LineChart from '@/components/LineChart';
@@ -33,6 +36,8 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import BusinessIcon from '@mui/icons-material/Business';
 
 const AgencyDashboard: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [agenciesData, setAgenciesData] = useState<AgencyData[]>([]);
@@ -42,19 +47,44 @@ const AgencyDashboard: React.FC = () => {
   const [vcpData, setVcpData] = useState<{ [key: string]: number | null }>({});
   const [agencyPlayers, setAgencyPlayers] = useState<PIBAData[]>([]);
   const [agencyAgents, setAgencyAgents] = useState<string[]>([]);
+  const [notificationOpen, setNotificationOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const agencies = await fetchAgenciesData();
-        const { pibaData } = await fetchData();
+        const response = await fetchAgenciesData();
+        
+        // Ensure we properly handle the data structure with type safety
+        let agencies: AgencyData[] = [];
+        if (Array.isArray(response)) {
+          agencies = response;
+        } else if (response && typeof response === 'object') {
+          // Use type assertion for the response
+          const typedResponse = response as { agenciesData?: AgencyData[] };
+          agencies = typedResponse.agenciesData || [];
+        }
         
         setAgenciesData(agencies);
+        
+        const { pibaData } = await fetchData();
         setPibaData(pibaData);
         
-        // Set default selected agency if data is available
-        if (agencies.length > 0) {
+        // Check if agency parameter exists in the URL
+        const queryParams = new URLSearchParams(location.search);
+        const agencyParam = queryParams.get('agency');
+        
+        if (agencyParam) {
+          // Find the agency in the loaded data
+          const foundAgency = agencies.find((a: AgencyData) => a['Agency Name'] === agencyParam);
+          if (foundAgency) {
+            setSelectedAgency(agencyParam);
+            setNotificationOpen(true);
+          }
+        }
+        
+        // If no agency is selected, default to the first agency
+        if (!selectedAgency && agencies.length > 0) {
           setSelectedAgency(agencies[0]['Agency Name']);
         }
         
@@ -67,7 +97,7 @@ const AgencyDashboard: React.FC = () => {
     };
     
     loadData();
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     if (selectedAgency && agenciesData.length > 0) {
@@ -119,6 +149,17 @@ const AgencyDashboard: React.FC = () => {
     setVcpData(vcp);
   };
 
+  // Close notification
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
+  // Handle navigation to agent dashboard
+  const handleAgentClick = (agentName: string) => {
+    // Navigate to agent dashboard with the agent name as a query parameter
+    navigate(`/agent-dashboard?agent=${encodeURIComponent(agentName)}`);
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -158,10 +199,30 @@ const AgencyDashboard: React.FC = () => {
     .slice(0, 3);
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 4 }}>
-      <Typography variant="h4" component="h1" sx={{ mb: 3, fontWeight: 'bold', color: 'secondary.main' }}>
-        Agency Overview Dashboard
-      </Typography>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3, py: 4 }}>
+      {/* Notification for when agency is selected from leaderboard */}
+      <Snackbar
+        open={notificationOpen}
+        autoHideDuration={4000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseNotification} severity="info" sx={{ width: '100%' }}>
+          Showing data for agency: {selectedAgency}
+        </Alert>
+      </Snackbar>
+      
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <Box 
+          component="img" 
+          src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Nashville_Predators_Logo_%282011%29.svg/1200px-Nashville_Predators_Logo_%282011%29.svg.png" 
+          alt="Nashville Predators Logo" 
+          sx={{ height: 50, mr: 2 }} 
+        />
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
+          Agency Insights Dashboard
+        </Typography>
+      </Box>
       
       <Paper sx={{ p: 3, mb: 4 }}>
         <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
@@ -207,7 +268,7 @@ const AgencyDashboard: React.FC = () => {
               <Grid item xs={12} sm={6} md={3}>
                 <MetricCard 
                   title="Win %" 
-                  value={`${(agencyInfo['Won%'] * 100).toFixed(1)}%`}
+                  value={formatPercentage(agencyInfo['Won%'])}
                   icon={<EmojiEventsIcon />}
                 />
               </Grid>
@@ -350,8 +411,26 @@ const AgencyDashboard: React.FC = () => {
                         key={agentName}
                         sx={{ '&:nth-of-type(odd)': { bgcolor: 'action.hover' } }}
                       >
-                        <TableCell component="th" scope="row">
-                          {agentName}
+                        <TableCell 
+                          component="th" 
+                          scope="row"
+                          onClick={() => handleAgentClick(agentName)}
+                          sx={{ 
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Box
+                            component="span"
+                            sx={{
+                              transition: 'all 0.2s ease',
+                              '&:hover': {
+                                color: 'primary.main',
+                                fontWeight: 'bold',
+                              }
+                            }}
+                          >
+                            {agentName}
+                          </Box>
                         </TableCell>
                         <TableCell>{agentClients.length}</TableCell>
                       </TableRow>

@@ -177,7 +177,7 @@ const HomePage: React.FC = () => {
         <Typography variant="body1" color="text.secondary">
           This dashboard visualizes data about hockey agents and agencies, providing insights into their performance,
           contract negotiations, and client relationships. The data is sourced from publicly available information
-          and is updated regularly. The dashboard is built with React, Material UI, and Chart.js.
+          and is updated regularly. 
         </Typography>
       </Paper>
     </Container>

@@ -32,6 +32,7 @@ export interface RanksData {
   'CTR': number;
   'TCV R': number;
   'TPV R': number;
+  'CT': number;
   [key: string]: any;
 }
 
@@ -296,6 +297,7 @@ export const fetchData = async () => {
       'Agent Name': agent['Agent Name'],
       'Agency Name': agent['Agency Name'],
       'Dollar Index': agent['Dollar Index'],
+      'CT': agent['CT'],
       // Generate ranks based on sorting
       'Index R': 0, // Will be calculated below
       'WinR': 0,

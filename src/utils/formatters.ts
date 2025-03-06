@@ -22,8 +22,8 @@ export const calculateAge = (birthdate: string | Date): number | string => {
  * Formats a dollar value with commas and $ sign
  */
 export const formatCurrency = (value: number): string => {
-  // If the value is between 0 and 1, it's likely a dollar index
-  if (value >= 0 && value <= 1) {
+  // Check if it's a dollar index (typically a small number with decimals)
+  if (value < 10) {
     return `$${value.toFixed(2)}`;
   }
   
@@ -47,9 +47,12 @@ export const formatCurrencyWithDecimals = (value: number): string => {
 
 /**
  * Formats a percentage value
+ * @param value - The percentage value (can be either 0-1 or 0-100)
  */
 export const formatPercentage = (value: number): string => {
-  return `${(value * 100).toFixed(1)}%`;
+  // Check if the value is already in the 0-100 range
+  const scaledValue = value > 1 ? value : value * 100;
+  return `${scaledValue.toFixed(1)}%`;
 };
 
 /**
@@ -72,5 +75,11 @@ export const formatValueCapturePercentage = (value: number): string => {
  * Formats a rank value
  */
 export const formatRank = (rank: number, total: number): string => {
+  // Check if rank is undefined, null, or NaN and display N/A
+  if (rank === undefined || rank === null || isNaN(rank)) {
+    return `N/A`;
+  }
+  
+  // Display actual rank number as is - no manipulation
   return `#${rank}/${total}`;
 }; 

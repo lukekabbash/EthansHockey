@@ -7,6 +7,7 @@ import Leaderboard from './pages/Leaderboard';
 import SecondContractsLeaderboard from './pages/SecondContractsLeaderboard';
 import Classifications from './pages/Classifications';
 import ProjectDefinitions from './pages/ProjectDefinitions';
+import AgentComparison from './pages/AgentComparison';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="second-contracts-leaderboard" element={<SecondContractsLeaderboard />} />
         <Route path="classifications" element={<Classifications />} />
         <Route path="project-definitions" element={<ProjectDefinitions />} />
+        <Route path="agent-comparison" element={<AgentComparison />} />
       </Route>
     </Routes>
   );

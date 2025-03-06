@@ -22,6 +22,7 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import CategoryIcon from '@mui/icons-material/Category';
 import InfoIcon from '@mui/icons-material/Info';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 
 // Predators logo
 const PREDATORS_LOGO = 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Nashville_Predators_Logo_%282011%29.svg/1200px-Nashville_Predators_Logo_%282011%29.svg.png';
@@ -34,6 +35,7 @@ const navItems = [
   { path: '/agency-dashboard', label: 'Agency Dashboard', icon: <BusinessIcon /> },
   { path: '/leaderboard', label: 'Leaderboard', icon: <LeaderboardIcon /> },
   { path: '/second-contracts-leaderboard', label: 'Second Contracts', icon: <AutoGraphIcon /> },
+  { path: '/agent-comparison', label: 'Agent Compare', icon: <CompareArrowsIcon /> },
   { path: '/classifications', label: 'Classifications', icon: <CategoryIcon /> },
   { path: '/project-definitions', label: 'Project Definitions', icon: <InfoIcon /> },
 ];
@@ -82,17 +84,25 @@ const Layout = () => {
                 color: 'white',
                 '&.active': {
                   bgcolor: 'primary.main',
-                  color: 'primary.contrastText',
+                  color: 'secondary.main',
                   '& .MuiListItemIcon-root': {
-                    color: 'primary.contrastText',
+                    color: 'secondary.main',
                   },
                 },
                 '&:hover': {
                   bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  color: 'primary.main',
+                  '& .MuiListItemIcon-root': {
+                    color: 'primary.main',
+                  },
                 },
               }}
             >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+              <ListItemIcon sx={{ 
+                color: 'white', 
+                minWidth: 40,
+                transition: 'color 0.2s',
+              }}>
                 {item.icon}
               </ListItemIcon>
               <ListItemText primary={item.label} />

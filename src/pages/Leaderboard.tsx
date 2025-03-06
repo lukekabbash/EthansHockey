@@ -2,18 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { fetchData } from '@/api/dataService';
 import { formatCurrency } from '@/utils/formatters';
 import type { RanksData } from '@/api/dataService';
+import { useNavigate } from 'react-router-dom';
 
 const Leaderboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [ranksData, setRanksData] = useState<RanksData[]>([]);
   const [filterMinContracts, setFilterMinContracts] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         const { ranksData } = await fetchData();
+        
+        // Debug: Log the CT values
+        console.log('Contracts Tracked values:', ranksData.map(agent => ({
+          name: agent['Agent Name'],
+          ct: agent['CT'],
+          rawCT: agent['CT']
+        })));
+        
         setRanksData(ranksData);
         setLoading(false);
       } catch (err) {
@@ -59,6 +69,18 @@ const Leaderboard: React.FC = () => {
     })
     .sort((a, b) => b['Dollar Index'] - a['Dollar Index'])
     .slice(0, 90); // Take top 90
+
+  // Handle navigation to agent dashboard
+  const handleAgentClick = (agentName: string) => {
+    // Navigate to agent dashboard with the agent name as a query parameter
+    navigate(`/agent-dashboard?agent=${encodeURIComponent(agentName)}`);
+  };
+
+  // Handle navigation to agency dashboard
+  const handleAgencyClick = (agencyName: string) => {
+    // Navigate to agency dashboard with the agency name as a query parameter
+    navigate(`/agency-dashboard?agency=${encodeURIComponent(agencyName)}`);
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -106,11 +128,17 @@ const Leaderboard: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {index + 1}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {agent['Agent Name']}
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium cursor-pointer transition-all duration-200 relative"
+                    onClick={() => handleAgentClick(agent['Agent Name'])}
+                  >
+                    <span className="relative z-10 hover:text-yellow-500 hover:font-bold transition-all duration-200">{agent['Agent Name']}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {agent['Agency Name']}
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer transition-all duration-200 relative"
+                    onClick={() => handleAgencyClick(agent['Agency Name'])}
+                  >
+                    <span className="relative z-10 hover:text-yellow-500 hover:font-bold transition-all duration-200">{agent['Agency Name']}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatCurrency(agent['Dollar Index'])}

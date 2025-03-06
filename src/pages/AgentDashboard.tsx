@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchData } from '@/api/dataService';
 import { formatCurrency, formatRank, formatDollarIndex } from '@/utils/formatters';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -17,7 +18,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  CircularProgress
+  CircularProgress,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import MetricCard from '@/components/MetricCard';
 import LineChart from '@/components/LineChart';
@@ -32,6 +35,8 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 
 const AgentDashboard: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [agentsData, setAgentsData] = useState<AgentData[]>([]);
@@ -42,6 +47,7 @@ const AgentDashboard: React.FC = () => {
   const [rankInfo, setRankInfo] = useState<RanksData | null>(null);
   const [vcpData, setVcpData] = useState<{ [key: string]: number | null }>({});
   const [agentPlayers, setAgentPlayers] = useState<PIBAData[]>([]);
+  const [notificationOpen, setNotificationOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -52,9 +58,22 @@ const AgentDashboard: React.FC = () => {
         setRanksData(ranksData);
         setPibaData(pibaData);
         
-        // Set default selected agent if data is available
-        if (ranksData.length > 0) {
-          setSelectedAgent(ranksData[0]['Agent Name']);
+        // Check if agent parameter exists in the URL
+        const queryParams = new URLSearchParams(location.search);
+        const agentParam = queryParams.get('agent');
+        
+        if (agentParam) {
+          // Find the agent in the loaded data
+          const foundAgent = agentsData.find(a => a['Agent Name'] === agentParam);
+          if (foundAgent) {
+            setSelectedAgent(agentParam);
+            setNotificationOpen(true);
+          }
+        }
+        
+        // If no agent is selected, default to the first agent
+        if (!selectedAgent && agentsData.length > 0) {
+          setSelectedAgent(agentsData[0]['Agent Name']);
         }
         
         setLoading(false);
@@ -66,7 +85,7 @@ const AgentDashboard: React.FC = () => {
     };
     
     loadData();
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     if (selectedAgent && agentsData.length > 0 && ranksData.length > 0) {
@@ -115,6 +134,17 @@ const AgentDashboard: React.FC = () => {
     setVcpData(vcp);
   };
 
+  // Close notification
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
+  // Handle navigation to agency dashboard
+  const handleAgencyClick = (agencyName: string) => {
+    // Navigate to agency dashboard with the agency name as a query parameter
+    navigate(`/agency-dashboard?agency=${encodeURIComponent(agencyName)}`);
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -154,7 +184,19 @@ const AgentDashboard: React.FC = () => {
     .slice(0, 3);
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', pb: 4 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3, py: 4 }}>
+      {/* Notification for when agent is selected from leaderboard */}
+      <Snackbar
+        open={notificationOpen}
+        autoHideDuration={4000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseNotification} severity="info" sx={{ width: '100%' }}>
+          Showing data for agent: {selectedAgent}
+        </Alert>
+      </Snackbar>
+      
       <Typography variant="h4" component="h1" sx={{ mb: 3, fontWeight: 'bold', color: 'secondary.main' }}>
         Agent Overview Dashboard
       </Typography>
@@ -181,7 +223,23 @@ const AgentDashboard: React.FC = () => {
         <>
           <Paper sx={{ p: 3, mb: 4 }}>
             <Typography variant="h5" component="h2" sx={{ mb: 2, fontWeight: 'bold', color: 'secondary.main' }}>
-              {selectedAgent} - {agentInfo['Agency Name']}
+              {selectedAgent} - 
+              <Box 
+                component="span" 
+                onClick={() => handleAgencyClick(agentInfo['Agency Name'])}
+                sx={{ 
+                  cursor: 'pointer',
+                  display: 'inline-block',
+                  px: 1,
+                  transition: 'color 0.2s ease',
+                  '&:hover': {
+                    color: 'primary.main',
+                    fontWeight: 'bold',
+                  }
+                }}
+              >
+                {agentInfo['Agency Name']}
+              </Box>
             </Typography>
             
             <Divider sx={{ mb: 3 }} />

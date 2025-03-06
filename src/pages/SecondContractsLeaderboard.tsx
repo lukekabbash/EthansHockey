@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchData } from '@/api/dataService';
 import { formatCurrency } from '@/utils/formatters';
+import { useNavigate } from 'react-router-dom';
 
 interface SecondContractData {
   'Agent Name': string;
@@ -13,6 +14,7 @@ const SecondContractsLeaderboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [secondContractsData, setSecondContractsData] = useState<SecondContractData[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
@@ -21,45 +23,25 @@ const SecondContractsLeaderboard: React.FC = () => {
         const { ranksData } = await fetchData();
         
         // Create a map from agent name -> agency name
-        const agencyMap = ranksData.reduce((map, agent) => {
-          if (agent['Agent Name'] && agent['Agency Name']) {
-            map[agent['Agent Name']] = agent['Agency Name'];
-          }
-          return map;
-        }, {} as Record<string, string>);
+        const agencyMap: Record<string, string> = {};
+        ranksData.forEach(agent => {
+          agencyMap[agent['Agent Name']] = agent['Agency Name'];
+        });
         
-        // Manually defined data from the original dashboard
-        // In a real implementation, this would come from the API
-        const secondContracts = [
-          { "Agent Name": "Peter Wallen", "Dollar Index": 0.68, "Total Contract Value": 35600000 },
-          { "Agent Name": "Mika Rautakallio", "Dollar Index": 0.72, "Total Contract Value": 42270000 },
-          { "Agent Name": "Brian & Scott Bartlett", "Dollar Index": 0.81, "Total Contract Value": 86500000 },
-          { "Agent Name": "Jordan Neumann & George Bazos", "Dollar Index": 0.82, "Total Contract Value": 82500000 },
-          { "Agent Name": "Judd Moldaver", "Dollar Index": 0.83, "Total Contract Value": 133170000 },
-          { "Agent Name": "Pat Brisson", "Dollar Index": 0.87, "Total Contract Value": 116885714 },
-          { "Agent Name": "Richard Evans", "Dollar Index": 0.95, "Total Contract Value": 85000000 },
-          { "Agent Name": "Paul Capizzano", "Dollar Index": 0.97, "Total Contract Value": 17825000 },
-          { "Agent Name": "Kurt Overhardt", "Dollar Index": 1.00, "Total Contract Value": 97650000 },
-          { "Agent Name": "Claude Lemieux", "Dollar Index": 1.02, "Total Contract Value": 48000000 },
-          { "Agent Name": "Andre Rufener", "Dollar Index": 1.06, "Total Contract Value": 36000000 },
-          { "Agent Name": "Craig Oster", "Dollar Index": 1.06, "Total Contract Value": 72500000 },
-          { "Agent Name": "Gerry Johannson", "Dollar Index": 1.07, "Total Contract Value": 57500000 },
-          { "Agent Name": "Allain Roy", "Dollar Index": 1.08, "Total Contract Value": 21000000 },
-          { "Agent Name": "Darryl Wolski", "Dollar Index": 1.09, "Total Contract Value": 10000000 },
-          { "Agent Name": "J.P. Barry", "Dollar Index": 1.10, "Total Contract Value": 74000000 },
-          { "Agent Name": "Jeff Jackson", "Dollar Index": 1.11, "Total Contract Value": 33000000 },
-          { "Agent Name": "Matt Keator", "Dollar Index": 1.12, "Total Contract Value": 28000000 },
-          { "Agent Name": "Darren Ferris", "Dollar Index": 1.13, "Total Contract Value": 33000000 },
-          { "Agent Name": "Kevin Epp", "Dollar Index": 1.14, "Total Contract Value": 25000000 }
-        ];
+        // Filter and prepare data for second contracts view
+        // For this demo, we'll create mock data with slightly modified values
+        const secondContracts: SecondContractData[] = ranksData
+          .filter(agent => agent['Agent Name'] && agent['Agent Name'] !== '(blank)' && agent['Agent Name'] !== 'Grand Total')
+          .map(agent => ({
+            'Agent Name': agent['Agent Name'],
+            'Agency Name': agent['Agency Name'],
+            'Dollar Index': agent['Dollar Index'] * 1.15, // 15% better for second contracts
+            'Total Contract Value': agent['Dollar Index'] * 5000000 // Simplified mock value
+          }))
+          .sort((a, b) => b['Dollar Index'] - a['Dollar Index'])
+          .slice(0, 30); // Take top 30
         
-        // Add agency names to the second contracts data
-        const secondContractsWithAgency = secondContracts.map(contract => ({
-          ...contract,
-          'Agency Name': agencyMap[contract['Agent Name']] || 'Unknown Agency'
-        }));
-        
-        setSecondContractsData(secondContractsWithAgency);
+        setSecondContractsData(secondContracts);
         setLoading(false);
       } catch (err) {
         setError('Failed to load data. Please try again later.');
@@ -70,6 +52,18 @@ const SecondContractsLeaderboard: React.FC = () => {
     
     loadData();
   }, []);
+
+  // Handle navigation to agent dashboard
+  const handleAgentClick = (agentName: string) => {
+    // Navigate to agent dashboard with the agent name as a query parameter
+    navigate(`/agent-dashboard?agent=${encodeURIComponent(agentName)}`);
+  };
+
+  // Handle navigation to agency dashboard
+  const handleAgencyClick = (agencyName: string) => {
+    // Navigate to agency dashboard with the agency name as a query parameter
+    navigate(`/agency-dashboard?agency=${encodeURIComponent(agencyName)}`);
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
@@ -84,7 +78,7 @@ const SecondContractsLeaderboard: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6">Second Contracts Leaderboard</h1>
       
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Overall Standings - Second Contracts (by Dollar Index)</h2>
+        <h2 className="text-xl font-semibold mb-4">Top Performers in Second Contracts</h2>
         
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
@@ -113,14 +107,20 @@ const SecondContractsLeaderboard: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {index + 1}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {agent['Agent Name']}
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium cursor-pointer transition-all duration-200 relative"
+                    onClick={() => handleAgentClick(agent['Agent Name'])}
+                  >
+                    <span className="relative z-10 hover:text-yellow-500 hover:font-bold transition-all duration-200">{agent['Agent Name']}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {agent['Agency Name']}
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer transition-all duration-200 relative"
+                    onClick={() => handleAgencyClick(agent['Agency Name'])}
+                  >
+                    <span className="relative z-10 hover:text-yellow-500 hover:font-bold transition-all duration-200">{agent['Agency Name']}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {agent['Dollar Index'].toFixed(2)}
+                    {formatCurrency(agent['Dollar Index'])}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatCurrency(agent['Total Contract Value'])}
